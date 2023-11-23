@@ -5,10 +5,13 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { theme } from "./color";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const STORAGE_KEY = "@toDos";
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
@@ -18,20 +21,32 @@ export default function App() {
   const onChangeText = (payload) => {
     setText(payload);
   };
-  const addTodo = () => {
+
+  useEffect(() => {
+    loadTodos();
+  }, []);
+
+  const loadTodos = async () => {
+    const s = await AsyncStorage.getItem(STORAGE_KEY);
+
+    setToDos(JSON.parse(s));
+  };
+
+  const addTodo = async () => {
     if (text === "") {
       return;
     }
 
-    const newTodos = Object.assign({}, toDos, {
-      [Date.now()]: { text, work: working },
-    });
+    const newTodos = { ...toDos, [Date.now()]: { text, working } };
 
     setToDos(newTodos);
-    console.log(toDos);
 
-    // save todo
+    await saveToDos(newTodos);
     setText("");
+  };
+
+  const saveToDos = async (toSave) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
   return (
     <View style={styles.container}>
@@ -63,6 +78,15 @@ export default function App() {
         style={styles.input}
         value={text}
       />
+      <ScrollView>
+        {Object.keys(toDos).map((key) =>
+          toDos[key].working === working ? (
+            <View style={styles.toDo} key={key}>
+              <Text style={styles.toDoText}>{toDos[key].text}</Text>
+            </View>
+          ) : null
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -87,7 +111,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
-    marginTop: 20,
+    marginVertical: 20,
     fontSize: 18,
   },
+  toDo: {
+    backgroundColor: theme.grey,
+    marginBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+  },
+  toDoText: { color: "white", fontSize: 16, fontWeight: "500" },
 });
