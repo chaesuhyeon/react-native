@@ -22,6 +22,12 @@ export default function App() {
         ]);
     }
 
+    function deleteGoalHandler(id) {
+        setCourseGoals((currentCourseGoals) => {
+            return currentCourseGoals.filter((goal) => goal.key !== id);
+        });
+    }
+
     return (
         <View style={styles.appContainer}>
             <GoalInput onAddGoal={addGoalHandler} />
@@ -29,7 +35,13 @@ export default function App() {
                 <FlatList
                     data={courseGoals}
                     renderItem={(itemData) => {
-                        return <GoalItem text={itemData.item.text} />;
+                        return (
+                            <GoalItem
+                                text={itemData.item.text}
+                                id={itemData.item.key}
+                                onDeleteItem={deleteGoalHandler}
+                            />
+                        );
                     }}
                     // 아래 작업은 실제 데이터에 key라는 변수명이 없을 때 해당 key값을 별도로 지정해주는 작업
                     // keyExtractor={(item, index) => {

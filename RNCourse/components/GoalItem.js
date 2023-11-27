@@ -1,11 +1,17 @@
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Pressable } from "react-native";
 function GoalItem(props) {
     return (
         <View style={styles.goalItem}>
-            <Text style={styles.goalText}>
-                {props.text}
-                {/* item은 내장되어 있는 변수명 */}
-            </Text>
+            <Pressable
+                onPress={props.onDeleteItem.bind(this, props.id)}
+                android_ripple={{ color: "#ddd" }}
+                style={({ pressed }) => pressed && styles.pressedItem}
+            >
+                <Text style={styles.goalText}>
+                    {props.text}
+                    {/* item은 내장되어 있는 변수명 */}
+                </Text>
+            </Pressable>
         </View>
     );
 }
@@ -19,7 +25,11 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         backgroundColor: "#5e0acc",
     },
+    pressedItem: {
+        opacity: 0.5,
+    },
     goalText: {
         color: "white",
+        padding: 8,
     },
 });
